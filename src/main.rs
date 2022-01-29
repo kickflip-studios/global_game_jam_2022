@@ -1,6 +1,10 @@
 #![allow(unused)]
 
-use bevy::prelude::*;
+use bevy::{
+    core::FixedTimestep,
+    prelude::*,
+    sprite::collide_aabb::{collide, Collision},
+};
 
 const PLAYER_SPRITE: &str = "player.png";
 const ELECTRON_SPRITE: &str = "electron.png";
@@ -13,6 +17,12 @@ const SCALE: f32 = 0.5;
 const TIME_STEP: f32 = 1. / 60.;
 
 
+#[derive(Component)]
+struct Player {
+    speed: f32,
+}
+
+#[derive(Component)]
 struct Charge {
     value: bool,
 }
@@ -28,9 +38,45 @@ fn main() {
 			..Default::default()
 		})
 		.add_plugins(DefaultPlugins)
-		.add_startup_system(setup.system())
+		.add_startup_system(setup)
+		.add_system_set(
+            SystemSet::new()
+                .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
+		)
 		.run();
 }
+
+
+fn player_movement(
+	mut commands: Commands,
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<(&Player, &mut Transform)>,
+) {
+	let (player, mut transform) = query.single_mut();
+	let mut  direction = Vec2::new(0.0, 0.0);
+    if keyboard_input.pressed(KeyCode::Left) {
+        direction.x -= 1.;
+    }
+    if keyboard_input.pressed(KeyCode::Right) {
+        direction.x += 1.;
+    }
+    if keyboard_input.pressed(KeyCode::Down) {
+        direction.y -=1.;
+    }
+    if keyboard_input.pressed(KeyCode::Up) {
+        direction.y += 1.;
+    }
+	let translation = &mut transform.translation;
+   // move the player
+   translation.x += direction.x * player.speed * TIME_STEP;
+   translation.y += direction.y * player.speed * TIME_STEP;
+
+   // bound the player within the walls
+   translation.x = translation.x.min(380.0).max(-380.0);
+   translation.y = translation.y.min(380.0).max(-380.0);
+}
+
+
 
 
 fn setup(
@@ -48,9 +94,13 @@ fn setup(
 
 	// spawn a sprite
 	let bottom = window.height()/2.;
-	commands
-	.spawn_bundle(SpriteBundle {
-		material: materials.add(asset_server.load(PLAYER_SPRITE).into()),
-		..Default::default()
+
+	commands.spawn_bundle(SpriteBundle {
+		sprite: Sprite {
+        custom_size: Some(Vec2::new(30.0, 30.0)),
+        ..Default::default()
+    },
+        texture: asset_server.load(PLAYER_SPRITE),
+        ..Default::default()
 	});
 }
