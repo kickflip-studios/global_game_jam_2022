@@ -9,7 +9,7 @@ use bevy::{
 
 mod constants;
 mod player;
-use player::player_movement;
+use player::{player_movement, Player};
 
 
 
@@ -58,12 +58,15 @@ fn setup(
 	let bottom = window.height()/2.;
 
 	// TODO: make a function in player module that is called here
-	commands.spawn_bundle(SpriteBundle {
-		sprite: Sprite {
-        custom_size: Some(Vec2::new(30.0, 30.0)),
-        ..Default::default()
-    },
-        texture: asset_server.load(constants::PLAYER_SPRITE),
-        ..Default::default()
-	});
+	commands
+		.spawn_bundle(SpriteBundle {
+			sprite: Sprite {
+	        custom_size: Some(Vec2::new(30.0, 30.0)),
+	        ..Default::default()
+	    },
+	        texture: asset_server.load(constants::PLAYER_SPRITE),
+	        ..Default::default()
+		})
+		.insert(Player{speed:150.});
+
 }

@@ -5,7 +5,7 @@ use crate::constants::*;
 
 #[derive(Component)]
 pub struct Player {
-    speed: f32,
+    pub speed: f32,
 }
 
 
@@ -35,7 +35,8 @@ pub fn player_movement(
    translation.y += direction.y * player.speed * TIME_STEP;
 
    // bound the player within the walls
-   // translation.x = translation.x.min(-SCREEN_WIDTH).max(SCREEN_WIDTH);
-   // translation.y = translation.y.min(SCREEN_HEIGHT).max(SCREEN_HEIGHT);
+   // FIXME: this isnt quite working atm...
+   translation.x = translation.x.min(SCREEN_WIDTH).max(-SCREEN_WIDTH);
+   translation.y = translation.y.min(SCREEN_HEIGHT).max(-SCREEN_HEIGHT);
 
 }
