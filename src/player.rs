@@ -1,0 +1,42 @@
+
+use bevy::prelude::*;
+
+use crate::constants::*;
+
+#[derive(Component)]
+pub struct Player {
+    pub speed: f32,
+}
+
+
+
+pub fn player_movement(
+	mut commands: Commands,
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<(&Player, &mut Transform)>,
+) {
+	let (player, mut transform) = query.single_mut();
+	let mut  direction = Vec2::new(0.0, 0.0);
+    if keyboard_input.pressed(KeyCode::Left) {
+        direction.x -= 1.;
+    }
+    if keyboard_input.pressed(KeyCode::Right) {
+        direction.x += 1.;
+    }
+    if keyboard_input.pressed(KeyCode::Down) {
+        direction.y -=1.;
+    }
+    if keyboard_input.pressed(KeyCode::Up) {
+        direction.y += 1.;
+    }
+	let translation = &mut transform.translation;
+   // move the player
+   translation.x += direction.x * player.speed * TIME_STEP;
+   translation.y += direction.y * player.speed * TIME_STEP;
+
+   // bound the player within the walls
+   // FIXME: this isnt quite working atm...
+   translation.x = translation.x.min(SCREEN_WIDTH).max(-SCREEN_WIDTH);
+   translation.y = translation.y.min(SCREEN_HEIGHT).max(-SCREEN_HEIGHT);
+
+}
