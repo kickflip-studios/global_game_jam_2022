@@ -33,6 +33,7 @@ fn main() {
 		.add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(constants::TIME_STEP as f64))
+				.with_system(player_movement)
 		)
 		.run();
 }

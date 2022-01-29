@@ -1,9 +1,10 @@
 
-mod constants;
 use bevy::prelude::*;
 
+use crate::constants::*;
+
 #[derive(Component)]
-struct Player {
+pub struct Player {
     speed: f32,
 }
 
@@ -30,10 +31,11 @@ pub fn player_movement(
     }
 	let translation = &mut transform.translation;
    // move the player
-   translation.x += direction.x * player.speed * constants::TIME_STEP;
-   translation.y += direction.y * player.speed * constants::TIME_STEP;
+   translation.x += direction.x * player.speed * TIME_STEP;
+   translation.y += direction.y * player.speed * TIME_STEP;
 
    // bound the player within the walls
-   translation.x = translation.x.min(380.0).max(-380.0);
-   translation.y = translation.y.min(380.0).max(-380.0);
+   // translation.x = translation.x.min(-SCREEN_WIDTH).max(SCREEN_WIDTH);
+   // translation.y = translation.y.min(SCREEN_HEIGHT).max(SCREEN_HEIGHT);
+
 }
