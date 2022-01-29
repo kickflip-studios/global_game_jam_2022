@@ -9,10 +9,13 @@ use bevy::{
 
 mod constants;
 mod player;
+
+
+use crate::constants::*;
 use player::{player_movement, Player};
 
 
-use particle::ParticlePlugin;
+use particle::{ParticlePlugin, Collider};
 mod particle;
 
 
@@ -72,6 +75,7 @@ fn setup(
 	        texture: asset_server.load(constants::PLAYER_SPRITE),
 	        ..Default::default()
 		})
-		.insert(Player{speed:150.});
+		.insert(Player{speed:150.})
+		.insert(Collider::Player);
 
 }
