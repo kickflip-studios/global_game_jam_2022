@@ -12,6 +12,9 @@ mod player;
 use player::{player_movement, Player};
 
 
+use particle::ParticlePlugin;
+mod particle;
+
 
 #[derive(Component)]
 struct Charge {
@@ -29,12 +32,14 @@ fn main() {
 			..Default::default()
 		})
 		.add_plugins(DefaultPlugins)
+		.add_plugin(ParticlePlugin)
 		.add_startup_system(setup)
 		.add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(constants::TIME_STEP as f64))
 				.with_system(player_movement)
 		)
+
 		.run();
 }
 
