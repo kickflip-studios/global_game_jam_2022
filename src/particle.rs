@@ -3,7 +3,7 @@ use bevy::{
     prelude::*,
     sprite::collide_aabb::{collide, Collision},
 };
-
+use rand::{thread_rng, Rng, random};
 
 use crate::constants::*;
 
@@ -17,9 +17,9 @@ pub enum Charge {
 
 #[derive(Component)]
 pub struct Particle {
-    pub position: Vec2,
+	pub position: Vec2,
 	pub speed: f32,
-	pub velocity: Vec2,
+	pub velocity: Vec3,
 	pub charge: Charge,
 	pub mass: f32
 }
@@ -46,28 +46,45 @@ fn particle_spawn(
 	asset_server: Res<AssetServer>,
 	mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-	// spawn enemy
+
+	let mut rng = thread_rng();
+	let charge_bool = rng.gen::<bool>();
+	let charge = if charge_bool {Charge::Positive} else {Charge::Negative};
+	let sprite_file = if charge_bool {POSITRON_SPRITE} else {ELECTRON_SPRITE};
+	let vel =  Vec3::new(rng.gen_range(-1.0..1.0) as f32, rng.gen_range(-1.0..1.0) as f32, 0.).normalize();
+	let pos =  Vec2::new(
+		rng.gen_range(-SCREEN_WIDTH/2.0..SCREEN_WIDTH/2.0) as f32,
+		rng.gen_range(-SCREEN_HEIGHT/2.0..SCREEN_HEIGHT/2.0) as f32,
+	);
 	commands
 		.spawn_bundle(
 			SpriteBundle {
-			texture: asset_server.load(POSITRON_SPRITE),
+			texture: asset_server.load(sprite_file),
 			transform: Transform {
-			translation: Vec3::new(0.,0., 0.),
+			translation: Vec3::new(pos.x,pos.y, 0.),
 			scale: Vec3::new(SCALE, SCALE, 1.),
 			..Default::default()
 			},
 			..Default::default()
 		})
 		.insert(Particle{
-			position:Vec2::new(SCREEN_WIDTH, SCREEN_HEIGHT/2.),
+			position: pos,
 			speed:150.,
-			velocity:Vec2::ZERO,
-			charge:Charge::Positive,
+			velocity:vel,
+			charge:charge,
 			mass:100.
 		})
 		.insert(Collider::Particle);
 }
 
+
+// TEMP WHILE PAUL GETS THE FORCES WORKING
+fn particle_movement_system(time: Res<Time>, mut particle_query: Query<(&Particle, &mut Transform)>) {
+    let delta_seconds = f32::min(0.2, time.delta_seconds());
+    for (particle, mut transform) in particle_query.iter_mut() {
+        transform.translation += particle.velocity * particle.speed * delta_seconds;
+    }
+}
 
 
 pub fn particle_collision_system(
@@ -89,6 +106,8 @@ pub fn particle_collision_system(
             transform.scale.truncate(),
         );
         if let Some(collision) = collision {
+
+			info!("Collision occured! ", );	
 
             // if collision with another particle
             if let Collider::Particle = *collider {
