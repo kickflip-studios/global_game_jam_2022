@@ -33,10 +33,15 @@ impl Plugin for ParticlePlugin {
 	fn build(&self, app: &mut bevy::prelude::App) {
 		app
 			.add_startup_system(particle_spawn)
+			// .add_system_set(
+			// 	SystemSet::new()
+			// 		.with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
+			// 		.with_system(particle_collision_system.system())
+			// )
 			.add_system_set(
 				SystemSet::new()
-					.with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-					.with_system(particle_collision_system.system())
+					.with_run_criteria(FixedTimestep::step(0.1))
+					.with_system(particle_spawn)
 			);
 	}
 }
@@ -44,7 +49,6 @@ impl Plugin for ParticlePlugin {
 fn particle_spawn(
 	mut commands: Commands,
 	asset_server: Res<AssetServer>,
-	mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
 
 	let mut rng = thread_rng();
@@ -107,7 +111,7 @@ pub fn particle_collision_system(
         );
         if let Some(collision) = collision {
 
-			info!("Collision occured! ", );	
+			info!("Collision occured! ", );
 
             // if collision with another particle
             if let Collider::Particle = *collider {
