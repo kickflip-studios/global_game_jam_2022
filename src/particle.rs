@@ -41,7 +41,7 @@ impl Plugin for ParticlePlugin {
 			.add_system_set(
 				SystemSet::new()
 					.with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-					.with_system(particle_collision_system.system())
+					// .with_system(particle_collision_system.system())
 					.with_system(particle_movement_system.system())
 			);
 	}
@@ -85,7 +85,6 @@ fn particle_spawn(
 
 // TEMP WHILE PAUL GETS THE FORCES WORKING
 fn particle_movement_system(time: Res<Time>, mut particle_query: Query<(&Particle, &mut Transform)>) {
-	info!("particle_movement_system");
     let delta_seconds = f32::min(0.2, time.delta_seconds());
     for (particle, mut transform) in particle_query.iter_mut() {
         transform.translation += particle.velocity * particle.speed * delta_seconds;
