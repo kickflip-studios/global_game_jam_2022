@@ -7,20 +7,6 @@ use rand::{thread_rng, Rng, random};
 
 use crate::constants::*;
 
-#[derive(PartialEq)]
-#[derive(Component)]
-pub enum Charge {
-    Positive,
-    Negative,
-}
-
-
-#[derive(Component)]
-pub struct Particle {
-	pub velocity: Vec3,
-	pub charge: Charge,
-	pub mass: f32
-}
 
 struct ActiveParticles(u32);
 
@@ -39,7 +25,8 @@ impl Plugin for ParticlePlugin {
 			.add_system_set(
 				SystemSet::new()
 					.with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-					.with_system(particle_collision_system.system())
+					.with_system(particle_wall_collision_system.system())
+					.with_system(particle_particle_collision_system.system())
 					.with_system(particle_movement_system.system())
 			);
 	}
@@ -56,7 +43,7 @@ fn particle_spawn(
 	{
 	let mut rng = thread_rng();
 	let charge_bool = rng.gen::<bool>();
-	let charge = if charge_bool {Charge::Positive} else {Charge::Negative};
+	let charge = if charge_bool {1.} else {-1.};
 	let sprite_file = if charge_bool {POSITRON_SPRITE} else {ELECTRON_SPRITE};
 	let vel =  Vec3::new(rng.gen_range(-1.0..1.0) as f32, rng.gen_range(-1.0..1.0) as f32, 0.).normalize();
 	let pos =  Vec2::new(
@@ -89,12 +76,12 @@ fn particle_spawn(
 // TEMP WHILE PAUL GETS THE FORCES WORKING
 fn particle_movement_system(
 	time: Res<Time>,
-	mut query: Query<(Entity, &mut Particle, &mut Transform)>,
+	mut query: Query<(Entity, &mut Particle, &mut Transform, &mut Collider)>,
 ) {
 	// info!("Particle movement");
     let delta_seconds = f32::min(0.2, time.delta_seconds());
 	let mut iter = query.iter_combinations_mut();
-	while let Some([(id1, mut p1, mut tx1), (id2, mut p2, mut tx2)]) =
+	while let Some([(id1, mut p1, mut tx1, c1), (id2, mut p2, mut tx2, c2)]) =
         iter.fetch_next() {
 			// tx1.translation += p1.velocity * delta_seconds;
 			// tx2.translation += p2.velocity * delta_seconds;
@@ -102,16 +89,16 @@ fn particle_movement_system(
 			let delta = tx1.translation - tx2.translation;
 			let d = delta.length();
 			if d > 0.01 {
-				let dt2 = delta_seconds.powi(2);
-				let scaled_vec = delta / d.powi(3);
-				let q1 = match p1.charge{
-					Charge::Positive => 1.0,
-					_ => -1.0,
-				};
-				let q2 = match p2.charge{
-					Charge::Positive => 1.0,
-					_ => -1.0,
-				};
+
+				// let dt2 = delta_seconds.powi(2);
+				// let scaled_vec = delta / d.powi(3);
+
+				let dt2 = delta_seconds;
+				let scaled_vec = delta / d.powi(2);
+
+				let q1 = p1.charge;
+				let q2 = p2.charge;
+
 				let force = COULOMB_CONSTANT* q1 * q2 * scaled_vec;
 				let a1 = force/p1.mass;
 				let a2 = -force/p2.mass;
@@ -121,8 +108,11 @@ fn particle_movement_system(
 				let dx2 = p2.velocity * delta_seconds + 0.5 * a2 * dt2;
 				tx1.translation += dx1;
 				tx2.translation += dx2;
-				p1.velocity += dv1;
-				p2.velocity += dv2;
+
+				if let Collider::Particle = *c1
+					{p1.velocity += dv1;}
+				if let Collider::Particle = *c2
+					{p2.velocity += dv2;}
 				// info!("(p1,p2) = ({:?},{:?}), v1={:?}, v2={:?}",id1,id2, p1.velocity, p2.velocity);
 
 			}
@@ -132,19 +122,21 @@ fn particle_movement_system(
 }
 
 
-pub fn particle_collision_system(
+pub fn particle_wall_collision_system(
 	mut commands: Commands,
 	sprite_infos: Res<SpriteInfos>,
     mut particle_query: Query<(Entity, &Transform, &Sprite,  &mut Particle  ), (With<Particle>)>,
     mut collider_query: Query<(Entity, &Transform, &Sprite, &Collider)>,
-	) {
+	)
+	{
     for (particle_entity, particle_transform, particle_sprite, mut particle) in particle_query.iter_mut(){
 		let particle_size = sprite_infos.particle.1 *  particle_transform.scale.truncate();
 		for (mut collider_entity, collider_transform, collider_sprite, collider) in collider_query.iter_mut() {
-
+			if let Collider::Wall = *collider {
 			let mut collider_size = Vec2::ZERO;
-			if let Collider::Wall = *collider {collider_size = collider_transform.scale.truncate();}
-			else {collider_size = sprite_infos.particle.1 *  collider_transform.scale.truncate();}
+			collider_size = collider_transform.scale.truncate();
+
+
 
 			let collision = collide(
 				particle_transform.translation, // position of particle
@@ -157,35 +149,8 @@ pub fn particle_collision_system(
 			if let Some(collision) = collision {
 
 
-				if let Collider::Player = *collider {
-
-				}
-
-				if let Collider::Particle = *collider {
-
-					// CHECK CHARGE
 
 
-					// METH0D 1
-					// let mut particle_check_query: Query<(&mut Particle)>;
-					// if let Ok((collider_particle)) = particle_check_query.get_mut(collider_entity) {
-					// 	if  collider_particle.charge != particle.charge{
-					// 			commands.entity(collider_entity).despawn();
-					// 			commands.entity(particle_entity).despawn();
-					// 	}
-					// }
-
-					// METHOD 2
-					// if let Some(collider_particle) = collider_particle{
-					// if  collider_particle.charge != particle.charge{
-					// 		commands.entity(collider_entity).despawn();
-					// 		commands.entity(particle_entity).despawn();
-					// }}
-
-				}
-
-
-				if let Collider::Wall = *collider {
 					// reflect the ball when it collides
 					let mut reflect_x = false;
 					let mut reflect_y = false;
@@ -219,3 +184,55 @@ pub fn particle_collision_system(
 	}
 
 }
+
+
+pub fn particle_particle_collision_system(
+	mut commands: Commands,
+	sprite_infos: Res<SpriteInfos>,
+	mut scoreboard: ResMut<Scoreboard>,
+    mut query: Query<(Entity, &mut Particle, &mut Transform, &mut Collider)>,
+	)
+	{
+
+	let mut iter = query.iter_combinations_mut();
+	while let Some([(particle_entity, mut particle, mut particle_transform, particle_collider), (collider_entity, mut p2, mut tx2, c2)]) =
+        iter.fetch_next() {}
+
+    // for (particle_entity, particle_transform, particle_sprite, mut particle) in particle_query.iter_mut(){
+	// 	let particle_size = sprite_infos.particle.1 *  particle_transform.scale.truncate();
+	// 	for (collider_entity, collider_transform, collider_sprite, collider, collider_particle) in collider_query.iter() {
+	//
+	// 		let collider_size = sprite_infos.particle.1 *  collider_transform.scale.truncate();
+	//
+	// 		let collision = collide(
+	// 			particle_transform.translation, // position of particle
+	// 			particle_size,
+	// 			collider_transform.translation, // position of collider
+	// 			collider_size,
+	// 		);
+	//
+	//
+	// 		if let Some(collision) = collision {
+	// 			if collider_particle.charge != particle.charge
+	// 			{
+	// 				if let Collider::Player = *collider {
+	// 					info!("END GAME");
+	// 				}
+	// 				else
+	// 				{
+	// 					info!("INCREASE SCORE");
+	// 					scoreboard.score += 1;
+	// 				}
+	//
+	// 				commands.entity(collider_entity).despawn();
+	// 				commands.entity(particle_entity).despawn();
+	//				active_particles.0 -= 1; // this will allow more to spawn
+	//
+	// 			}
+	//
+	//
+	// 		}
+	// 	}
+	// }
+
+	}

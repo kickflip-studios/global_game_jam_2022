@@ -7,9 +7,7 @@ use bevy::{
 use crate::constants::*;
 
 
-pub struct Scoreboard {
-    score: usize,
-}
+
 
 pub fn scoreboard_system(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text>) {
     let mut text = query.single_mut();
@@ -29,7 +27,7 @@ pub fn spawn_scoreboard(
                     style: TextStyle {
                         font: asset_server.load(BOLD_FONT),
                         font_size: 40.0,
-                        color: Color::BLACK,
+                        color: Color::WHITE,
                     },
                 },
                 TextSection {
@@ -37,7 +35,7 @@ pub fn spawn_scoreboard(
                     style: TextStyle {
                         font: asset_server.load(NORMAL_FONT),
                         font_size: 40.0,
-                        color: Color::BLACK
+                        color: Color::WHITE
                     },
                 },
             ],

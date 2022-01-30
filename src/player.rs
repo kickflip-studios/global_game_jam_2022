@@ -3,6 +3,7 @@ use bevy::prelude::*;
 
 use crate::constants::*;
 
+
 #[derive(Component)]
 pub struct Player {
     pub speed: f32,
@@ -18,11 +19,6 @@ impl Plugin for PlayerPlugin {
 		app
 			.add_startup_system(player_spawn)
 			.add_system(player_movement);
-			// .add_system_set(
-			// 	SystemSet::new()
-			// 		.with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-			// 		.with_system(particle_collision_system.system())
-			// );
 	}
 }
 
@@ -44,7 +40,12 @@ pub fn player_spawn(
 			..Default::default()
 		})
 		.insert(Player{speed:150.})
-		.insert(Collider::Player);
+		.insert(Collider::Player)
+		.insert(Particle{
+			velocity:Vec3::ZERO,
+			charge:-2.,
+			mass:100.
+		});
 }
 
 

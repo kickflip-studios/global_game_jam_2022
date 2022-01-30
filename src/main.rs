@@ -19,12 +19,12 @@ use crate::constants::*;
 use player::{ PlayerPlugin};
 use particle::ParticlePlugin;
 use walls::spawn_walls;
-use scoreboard::{Scoreboard, ScorePlugin};
+use scoreboard::{ ScorePlugin};
 
 
 fn main() {
     App::new()
-		.insert_resource(ClearColor(Color::rgb(1., 1., 1.)))
+		.insert_resource(ClearColor(Color::BLACK))
 		.insert_resource(WindowDescriptor {
 			title: "Global game jam 2022".to_string(),
 			width: constants::SCREEN_WIDTH,
@@ -37,6 +37,7 @@ fn main() {
 		.add_plugin(ParticlePlugin)
 		.add_plugin(ScorePlugin)
 		.add_startup_system(setup)
+		.add_system(bevy::input::system::exit_on_esc_system)
 		.run();
 }
 

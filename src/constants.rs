@@ -26,7 +26,7 @@ pub const TIME_STEP: f32 = 1. / 60.;
 pub const SCREEN_WIDTH: f32 = 600.0;
 pub const SCREEN_HEIGHT: f32 = 500.0;
 
-pub const COULOMB_CONSTANT: f32 = 10000.0;
+pub const COULOMB_CONSTANT: f32 = 15000.0;
 
 #[derive(Component)]
 pub enum Collider {
@@ -35,9 +35,21 @@ pub enum Collider {
 	Player,
 }
 
+pub struct Scoreboard {
+    pub score: usize,
+}
 
 // region:    Resources
 pub struct SpriteInfos {
 	pub player: (Handle<Image>, Vec2),
 	pub particle: (Handle<Image>, Vec2),
+}
+
+
+
+#[derive(Component)]
+pub struct Particle {
+	pub velocity: Vec3,
+	pub charge: f32,
+	pub mass: f32
 }
