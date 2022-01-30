@@ -20,11 +20,6 @@ use walls::spawn_walls;
 
 
 
-#[derive(Component)]
-struct Charge {
-    value: f32,
-}
-
 fn main() {
     App::new()
 		.insert_resource(ClearColor(Color::rgb(1., 1., 1.)))
