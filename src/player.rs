@@ -10,6 +10,44 @@ pub struct Player {
 
 
 
+pub struct PlayerPlugin;
+
+
+impl Plugin for PlayerPlugin {
+	fn build(&self, app: &mut bevy::prelude::App) {
+		app
+			.add_startup_system(player_spawn)
+			.add_system(player_movement);
+			// .add_system_set(
+			// 	SystemSet::new()
+			// 		.with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
+			// 		.with_system(particle_collision_system.system())
+			// );
+	}
+}
+
+
+pub fn player_spawn(
+	mut commands: Commands,
+	asset_server: Res<AssetServer>,
+	mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+	commands
+		.spawn_bundle(
+			SpriteBundle {
+			texture: asset_server.load(PLAYER_SPRITE),
+			transform: Transform {
+			translation: Vec3::new(0., 0., 0.),
+			scale: Vec3::new(SCALE, SCALE, 1.),
+			..Default::default()
+			},
+			..Default::default()
+		})
+		.insert(Player{speed:150.})
+		.insert(Collider::Player);
+}
+
+
 pub fn player_movement(
 	mut commands: Commands,
     keyboard_input: Res<Input<KeyCode>>,
