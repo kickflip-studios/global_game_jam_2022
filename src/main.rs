@@ -7,6 +7,7 @@ use bevy::{
     sprite::collide_aabb::{collide, Collision},
 };
 
+
 mod constants;
 mod player;
 mod particle;
@@ -33,6 +34,7 @@ fn main() {
 			height:  constants::SCREEN_HEIGHT,
 			..Default::default()
 		})
+
 		.add_plugins(DefaultPlugins)
 		.add_plugin(ParticlePlugin)
 		.add_plugin(PlayerPlugin)
@@ -47,6 +49,8 @@ fn main() {
 
 		.run();
 }
+
+
 
 
 

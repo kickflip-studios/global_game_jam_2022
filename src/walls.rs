@@ -9,7 +9,7 @@ pub fn spawn_walls(
 {
     // Add walls
     let wall_color = Color::rgb(0.8, 0.8, 0.8);
-    let wall_thickness = 10.0;
+    let wall_thickness = WALL_THICKNESS;
     let bounds = Vec2::new(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     // left

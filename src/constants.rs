@@ -11,6 +11,8 @@ pub const SPHERE_SPRITE: &str = "charge_sphere.png";
 pub const BACKGROUND_SPRITE: &str = "backgound.png";
 
 
+pub const WALL_THICKNESS: f32 = 10.;
+
 pub const SCALE: f32 = 0.1;
 pub const TIME_STEP: f32 = 1. / 60.;
 
