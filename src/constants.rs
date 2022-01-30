@@ -1,7 +1,7 @@
 use bevy::{
-	core::FixedTimestep,
-	prelude::*,
-	sprite::collide_aabb::{collide, Collision},
+    core::FixedTimestep,
+    prelude::*,
+    sprite::collide_aabb::{collide, Collision},
 };
 
 pub const SPRITE_DIR: &str = "assets";
@@ -32,24 +32,24 @@ pub const MAXIMUM_SPEED: f32 = 10.0 * WALL_THICKNESS / TIME_STEP;
 
 #[derive(Component)]
 pub enum Collider {
-	Wall,
-	Particle,
-	Player,
+    Wall,
+    Particle,
+    Player,
 }
 
 pub struct Scoreboard {
-	pub score: usize,
+    pub score: usize,
 }
 
 // region:    Resources
 pub struct SpriteInfos {
-	pub player: (Handle<Image>, Vec2),
-	pub particle: (Handle<Image>, Vec2),
+    pub player: (Handle<Image>, Vec2),
+    pub particle: (Handle<Image>, Vec2),
 }
 
 #[derive(Component)]
 pub struct Particle {
-	pub velocity: Vec3,
-	pub charge: f32,
-	pub mass: f32,
+    pub velocity: Vec3,
+    pub charge: f32,
+    pub mass: f32,
 }
