@@ -51,8 +51,7 @@ pub struct ScorePlugin;
 
 impl Plugin for ScorePlugin {
 	fn build(&self, app: &mut bevy::prelude::App) {
-		app
-			.insert_resource(Scoreboard { score: 0 })
+		app.insert_resource(Scoreboard { score: 0 })
 			.add_startup_system(spawn_scoreboard)
 			.add_system(scoreboard_system);
 	}

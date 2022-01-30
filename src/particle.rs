@@ -1,9 +1,10 @@
+use bevy::app::AppExit;
 use bevy::{
+	app::Events,
 	core::FixedTimestep,
 	prelude::*,
-	sprite::collide_aabb::{collide, Collision}, app::Events,
+	sprite::collide_aabb::{collide, Collision},
 };
-use bevy::app::AppExit;
 use rand::{random, thread_rng, Rng};
 
 use crate::constants::*;
@@ -14,8 +15,7 @@ pub struct ParticlePlugin;
 
 impl Plugin for ParticlePlugin {
 	fn build(&self, app: &mut bevy::prelude::App) {
-		app
-			.insert_resource(ActiveParticles(0))
+		app.insert_resource(ActiveParticles(0))
 			.add_system_set(
 				SystemSet::new()
 					.with_run_criteria(FixedTimestep::step(0.3))
@@ -50,8 +50,7 @@ fn particle_spawn(
 			rng.gen_range(-1.0..1.0) as f32,
 			0.,
 		)
-		.normalize()
-			* VELOCITY_SCALE;
+		.normalize() * VELOCITY_SCALE;
 		let pos = Vec2::new(
 			rng.gen_range(-SCREEN_WIDTH / 2.0..SCREEN_WIDTH / 2.0) as f32,
 			rng.gen_range(-SCREEN_HEIGHT / 2.0..SCREEN_HEIGHT / 2.0) as f32,
@@ -86,7 +85,8 @@ fn particle_movement_system(
 	// info!("Particle movement");
 	let delta_seconds = f32::min(0.2, time.delta_seconds());
 	let mut iter = query.iter_combinations_mut();
-	while let Some([(id1, mut p1, mut tx1, c1), (id2, mut p2, mut tx2, c2)]) = iter.fetch_next() {
+	while let Some([(id1, mut p1, mut tx1, c1), 
+				(id2, mut p2, mut tx2, c2)]) = iter.fetch_next() {
 		// tx1.translation += p1.velocity * delta_seconds;
 		// tx2.translation += p2.velocity * delta_seconds;
 
@@ -225,7 +225,7 @@ pub fn particle_particle_collision_system(
 				} else {
 					// info!("INCREASE SCORE");
 					scoreboard.score += 1;
-					info!("INCREASE SCORE = {}",scoreboard.score);
+					info!("INCREASE SCORE = {}", scoreboard.score);
 				}
 
 				commands.entity(id1).despawn();
@@ -235,40 +235,3 @@ pub fn particle_particle_collision_system(
 		}
 	}
 }
-
-// for (particle_entity, particle_transform, particle_sprite, mut particle) in particle_query.iter_mut(){
-// 	let particle_size = sprite_infos.particle.1 *  particle_transform.scale.truncate();
-// 	for (collider_entity, collider_transform, collider_sprite, collider, collider_particle) in collider_query.iter() {
-//
-// 		let collider_size = sprite_infos.particle.1 *  collider_transform.scale.truncate();
-//
-// 		let collision = collide(
-// 			particle_transform.translation, // position of particle
-// 			particle_size,
-// 			collider_transform.translation, // position of collider
-// 			collider_size,
-// 		);
-//
-//
-// 		if let Some(collision) = collision {
-// 			if collider_particle.charge != particle.charge
-// 			{
-// 				if let Collider::Player = *collider {
-// 					info!("END GAME");
-// 				}
-// 				else
-// 				{
-// 					info!("INCREASE SCORE");
-// 					scoreboard.score += 1;
-// 				}
-//
-// 				commands.entity(collider_entity).despawn();
-// 				commands.entity(particle_entity).despawn();
-//				active_particles.0 -= 1; // this will allow more to spawn
-//
-// 			}
-//
-//
-// 		}
-// 	}
-// }
