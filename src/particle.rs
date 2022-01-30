@@ -17,8 +17,6 @@ pub enum Charge {
 
 #[derive(Component)]
 pub struct Particle {
-	pub position: Vec2,
-	// pub speed: f32,
 	pub velocity: Vec3,
 	pub charge: Charge,
 	pub mass: f32
@@ -73,8 +71,6 @@ fn particle_spawn(
 			..Default::default()
 		})
 		.insert(Particle{
-			position: pos,
-			// speed:150.,
 			velocity:vel,
 			charge,
 			mass:100.
@@ -133,11 +129,11 @@ pub fn particle_collision_system(
 	mut commands: Commands,
 	sprite_infos: Res<SpriteInfos>,
     mut particle_query: Query<(Entity, &Transform, &Sprite,  &mut Particle  ), (With<Particle>)>,
-    mut collider_query: Query<(Entity, &Transform, &Sprite, &Collider)>,
+    mut collider_query: Query<(Entity, &Transform, &Sprite, &Collider, Option<&Particle>)>,
 	) {
     for (particle_entity, particle_transform, particle_sprite, mut particle) in particle_query.iter_mut(){
 		let particle_size = sprite_infos.particle.1 *  particle_transform.scale.truncate();
-		for (mut collider_entity, collider_transform, collider_sprite, collider, ) in collider_query.iter_mut() {
+		for (mut collider_entity, collider_transform, collider_sprite, collider, collider_particle) in collider_query.iter_mut() {
 
 			let mut collider_size = Vec2::ZERO;
 			if let Collider::Wall = *collider {collider_size = collider_transform.scale.truncate();}
@@ -159,14 +155,25 @@ pub fn particle_collision_system(
 				}
 
 				if let Collider::Particle = *collider {
-					let mut particle_check_query: Query<(&mut Particle)>;
-					if let Ok((collider_particle)) = particle_check_query.get_mut(collider_entity) {
-						if  collider_particle.charge != particle.charge{
-								commands.entity(collider_entity).despawn();
-								commands.entity(particle_entity).despawn();
-						}
-					}
 
+					// CHECK CHARGE
+
+
+					// METH0D 1
+					// let mut particle_check_query: Query<(&mut Particle)>;
+					// if let Ok((collider_particle)) = particle_check_query.get_mut(collider_entity) {
+					// 	if  collider_particle.charge != particle.charge{
+					// 			commands.entity(collider_entity).despawn();
+					// 			commands.entity(particle_entity).despawn();
+					// 	}
+					// }
+
+					// METHOD 2
+					// if let Some(collider_particle) = collider_particle{
+					// if  collider_particle.charge != particle.charge{
+					// 		commands.entity(collider_entity).despawn();
+					// 		commands.entity(particle_entity).despawn();
+					// }}
 
 				}
 
