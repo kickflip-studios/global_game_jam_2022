@@ -225,11 +225,12 @@ pub fn particle_particle_collision_system(
                     // info!("INCREASE SCORE");
                     scoreboard.score += 1;
                     info!("INCREASE SCORE = {}", scoreboard.score);
+
                 }
 
                 commands.entity(id1).despawn();
                 commands.entity(id2).despawn();
-                active_particles.0 -= 1; // this will allow more to spawn
+                active_particles.0 -= 2; // this will allow more to spawn
             }
         }
     }
