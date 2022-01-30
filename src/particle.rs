@@ -7,6 +7,7 @@ use rand::{thread_rng, Rng, random};
 
 use crate::constants::*;
 
+#[derive(PartialEq)]
 #[derive(Component)]
 pub enum Charge {
     Positive,
