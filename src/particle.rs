@@ -13,12 +13,6 @@ pub enum Charge {
     Negative,
 }
 
-#[derive(Component)]
-pub enum Collider {
-    Wall,
-    Particle,
-	Player,
-}
 
 
 #[derive(Component)]
@@ -42,7 +36,7 @@ impl Plugin for ParticlePlugin {
 			.add_system_set(
 				SystemSet::new()
 					.with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-					.with_system(particle_collision_system)
+					.with_system(particle_collision_system.system())
 			);
 	}
 }
@@ -54,27 +48,29 @@ fn particle_spawn(
 ) {
 	// spawn enemy
 	commands
-		.spawn_bundle(SpriteBundle {
-			sprite: Sprite {
-			custom_size: Some(Vec2::new(30.0, 30.0)),
-			..Default::default()
-		},
+		.spawn_bundle(
+			SpriteBundle {
 			texture: asset_server.load(POSITRON_SPRITE),
+			transform: Transform {
+			translation: Vec3::new(0.,0., 0.),
+			scale: Vec3::new(SCALE, SCALE, 1.),
+			..Default::default()
+			},
 			..Default::default()
 		})
 		.insert(Particle{
-			position:Vec2::new(30.0, 30.0),
+			position:Vec2::new(SCREEN_WIDTH, SCREEN_HEIGHT/2.),
 			speed:150.,
 			velocity:Vec2::ZERO,
 			charge:Charge::Positive,
 			mass:100.
-		}
-		);
+		})
+		.insert(Collider::Particle);
 }
 
 
 
-fn particle_collision_system(
+pub fn particle_collision_system(
 	mut commands: Commands,
     mut particle_query: Query<(&mut Particle, &Transform)>,
     collider_query: Query<(Entity, &Collider, &Transform)>,
@@ -82,6 +78,7 @@ fn particle_collision_system(
     let (mut particle, particle_transform) = particle_query.single_mut();
     let particle_size = particle_transform.scale.truncate();
     let velocity = &mut particle.velocity;
+
 
     // check collision with walls
     for (collider_entity, collider, transform) in collider_query.iter() {
@@ -95,12 +92,12 @@ fn particle_collision_system(
 
             // if collision with another particle
             if let Collider::Particle = *collider {
-				print!("Collision with another particle", );
+				info!("Collision with another particle", );
             }
 
 			// if collision with player
 			if let Collider::Player = *collider {
-				print!("Collision with Player", );
+				info!("Collision with Player", );
 			}
 
             // reflect the ball when it collides
