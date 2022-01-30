@@ -12,10 +12,11 @@ pub const POSITRON_SPRITE: &str = "positron.png";
 pub const SPHERE_SPRITE: &str = "charge_sphere.png";
 pub const BACKGROUND_SPRITE: &str = "backgound.png";
 
-pub const NORMAL_FONT: &str = "fonts/FiraSans-Medium.tff";
-pub const BOLD_FONT: &str = "fonts/FiraSans-Bold.tff";
+pub const NORMAL_FONT: &str = "fonts/FiraSans-Medium.ttf";
+pub const BOLD_FONT: &str = "fonts/FiraSans-Bold.ttf";
 
 
+pub const MAX_NUM_PARTICLES: u32 = 10;
 
 pub const WALL_THICKNESS: f32 = 10.;
 

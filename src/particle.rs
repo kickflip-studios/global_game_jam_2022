@@ -22,7 +22,7 @@ pub struct Particle {
 	pub mass: f32
 }
 
-
+struct ActiveParticles(u32);
 
 pub struct ParticlePlugin;
 
@@ -30,7 +30,7 @@ pub struct ParticlePlugin;
 impl Plugin for ParticlePlugin {
 	fn build(&self, app: &mut bevy::prelude::App) {
 		app
-			.add_startup_system(particle_spawn)
+			.insert_resource(ActiveParticles(0))
 			.add_system_set(
 				SystemSet::new()
 					.with_run_criteria(FixedTimestep::step(0.3))
@@ -47,9 +47,13 @@ impl Plugin for ParticlePlugin {
 
 fn particle_spawn(
 	mut commands: Commands,
+	mut active_particles: ResMut<ActiveParticles>,
 	asset_server: Res<AssetServer>,
 ) {
 
+
+	if  active_particles.0 < MAX_NUM_PARTICLES
+	{
 	let mut rng = thread_rng();
 	let charge_bool = rng.gen::<bool>();
 	let charge = if charge_bool {Charge::Positive} else {Charge::Negative};
@@ -76,6 +80,9 @@ fn particle_spawn(
 			mass:100.
 		})
 		.insert(Collider::Particle);
+		active_particles.0 += 1;
+		info!("Added another particle (now {:?})", active_particles.0)
+	}
 }
 
 // fn interact_bodies(mut query: Query<(&Mass, &GlobalTransform, &mut Acceleration)>)
@@ -129,11 +136,11 @@ pub fn particle_collision_system(
 	mut commands: Commands,
 	sprite_infos: Res<SpriteInfos>,
     mut particle_query: Query<(Entity, &Transform, &Sprite,  &mut Particle  ), (With<Particle>)>,
-    mut collider_query: Query<(Entity, &Transform, &Sprite, &Collider, Option<&Particle>)>,
+    mut collider_query: Query<(Entity, &Transform, &Sprite, &Collider)>,
 	) {
     for (particle_entity, particle_transform, particle_sprite, mut particle) in particle_query.iter_mut(){
 		let particle_size = sprite_infos.particle.1 *  particle_transform.scale.truncate();
-		for (mut collider_entity, collider_transform, collider_sprite, collider, collider_particle) in collider_query.iter_mut() {
+		for (mut collider_entity, collider_transform, collider_sprite, collider) in collider_query.iter_mut() {
 
 			let mut collider_size = Vec2::ZERO;
 			if let Collider::Wall = *collider {collider_size = collider_transform.scale.truncate();}

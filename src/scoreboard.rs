@@ -29,7 +29,7 @@ pub fn spawn_scoreboard(
                     style: TextStyle {
                         font: asset_server.load(BOLD_FONT),
                         font_size: 40.0,
-                        color: Color::rgb(0.5, 0.5, 1.0),
+                        color: Color::BLACK,
                     },
                 },
                 TextSection {
@@ -37,7 +37,7 @@ pub fn spawn_scoreboard(
                     style: TextStyle {
                         font: asset_server.load(NORMAL_FONT),
                         font_size: 40.0,
-                        color: Color::rgb(1.0, 0.5, 0.5),
+                        color: Color::BLACK
                     },
                 },
             ],
@@ -64,6 +64,7 @@ impl Plugin for ScorePlugin {
 	fn build(&self, app: &mut bevy::prelude::App) {
 		app
 		    .insert_resource(Scoreboard { score: 0 })
-			.add_startup_system(spawn_scoreboard);
+			.add_startup_system(spawn_scoreboard)
+			.add_system(scoreboard_system);
 	}
 }
