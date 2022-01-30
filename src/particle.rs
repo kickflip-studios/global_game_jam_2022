@@ -35,13 +35,13 @@ impl Plugin for ParticlePlugin {
 			.add_system_set(
 				SystemSet::new()
 					.with_run_criteria(FixedTimestep::step(0.3))
-					// .with_system(particle_spawn)
+					.with_system(particle_spawn)
 			)
 			.add_system_set(
 				SystemSet::new()
 					.with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
 					.with_system(particle_collision_system.system())
-					// .with_system(particle_movement_system.system())
+					.with_system(particle_movement_system.system())
 			);
 	}
 }
@@ -84,7 +84,7 @@ fn particle_spawn(
 // fn interact_bodies(mut query: Query<(&Mass, &GlobalTransform, &mut Acceleration)>)
 // TEMP WHILE PAUL GETS THE FORCES WORKING
 fn particle_movement_system(
-	time: Res<Time>, 
+	time: Res<Time>,
 	mut query: Query<(Entity, &mut Particle, &mut Transform)>,
 ) {
 	// info!("Particle movement");
@@ -122,9 +122,9 @@ fn particle_movement_system(
 				// info!("(p1,p2) = ({:?},{:?}), v1={:?}, v2={:?}",id1,id2, p1.velocity, p2.velocity);
 
 			}
-			
+
 		}
-	
+
 }
 
 
