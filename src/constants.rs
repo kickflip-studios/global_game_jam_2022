@@ -15,11 +15,11 @@ pub const BACKGROUND_SPRITE: &str = "backgound.png";
 
 pub const WALL_THICKNESS: f32 = 10.;
 
-pub const SCALE: f32 = 0.5;
+pub const SCALE: f32 = 0.1;
 pub const TIME_STEP: f32 = 1. / 60.;
 
-pub const SCREEN_WIDTH: f32 = 1000.0;
-pub const SCREEN_HEIGHT: f32 = 1000.0;
+pub const SCREEN_WIDTH: f32 = 600.0;
+pub const SCREEN_HEIGHT: f32 = 500.0;
 
 pub const COULOMB_CONSTANT: f32 = 10000.0;
 
