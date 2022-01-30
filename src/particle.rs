@@ -35,13 +35,13 @@ impl Plugin for ParticlePlugin {
 			.add_system_set(
 				SystemSet::new()
 					.with_run_criteria(FixedTimestep::step(0.3))
-					.with_system(particle_spawn)
+					// .with_system(particle_spawn)
 			)
 			.add_system_set(
 				SystemSet::new()
 					.with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
 					.with_system(particle_collision_system.system())
-					.with_system(particle_movement_system.system())
+					// .with_system(particle_movement_system.system())
 			);
 	}
 }
@@ -130,38 +130,39 @@ fn particle_movement_system(
 
 pub fn particle_collision_system(
 	mut commands: Commands,
-    mut particle_query: Query<(&mut Particle, &Transform)>,
-    collider_query: Query<(Entity, &Collider, &Transform)>,
+	sprite_infos: Res<SpriteInfos>,
+    mut particle_query: Query<(Entity, &Transform, &Sprite,  &mut Particle  ), (With<Particle>)>,
+    mut collider_query: Query<(Entity, &Transform, &Sprite, &Collider)>,
 	) {
-    for (mut particle, particle_transform) in particle_query.iter_mut(){
-		let particle_size = particle_transform.scale.truncate();
-		let velocity = &mut particle.velocity;
+    for (particle_entity, particle_transform, particle_sprite, mut particle) in particle_query.iter_mut(){
+		let particle_size = sprite_infos.particle.1 *  particle_transform.scale.truncate();
+		for (mut collider_entity, collider_transform, collider_sprite, collider, ) in collider_query.iter_mut() {
 
-		for (collider_entity, collider, transform) in collider_query.iter() {
+			let mut collider_size = Vec2::ZERO;
+			if let Collider::Wall = *collider {collider_size = collider_transform.scale.truncate();}
+			else {collider_size = sprite_infos.particle.1 *  collider_transform.scale.truncate();}
+
 			let collision = collide(
-				particle_transform.translation,
+				particle_transform.translation, // position of particle
 				particle_size,
-				transform.translation,
-				transform.scale.truncate(),
+				collider_transform.translation, // position of collider
+				collider_size,
 			);
+
+			// info!("Checking collision bw particle and {:?}\n",collider);
+			// info!("Particle {:?} {:?}\n", particle_size, particle_transform.translation);
+			// info!("{:?} {:?} {:?}",  collider, collider_size, collider_transform.translation);
+
 			if let Some(collision) = collision {
-	
-				// info!("Collision occured! ", );
-	
-				// if collision with another particle
-				if let Collider::Particle = *collider {
-					info!("Collision with another particle", );
-				}
-	
-				// if collision with player
-				if let Collider::Player = *collider {
-					info!("Collision with Player", );
-				}
-	
+
+
+				// info!("COLLISION OCCURED");
+
 				// reflect the ball when it collides
 				let mut reflect_x = false;
 				let mut reflect_y = false;
-	
+
+				let velocity = &mut particle.velocity;
 				// only reflect if the ball's velocity is going in the opposite direction of the
 				// collision
 				match collision {
@@ -170,28 +171,23 @@ pub fn particle_collision_system(
 					Collision::Top => reflect_y = velocity.y < 0.0,
 					Collision::Bottom => reflect_y = velocity.y > 0.0,
 				}
-	
+
 				// reflect velocity on the x-axis if we hit something on the x-axis
 				if reflect_x {
 					velocity.x = -velocity.x;
 				}
-	
+
 				// reflect velocity on the y-axis if we hit something on the y-axis
 				if reflect_y {
 					velocity.y = -velocity.y;
 				}
-	
+
 				// break if this collide is on a solid, otherwise continue check whether a solid is
 				// also in collision
-				if let Collider::Wall = *collider {
-					break;
-				}
+				if let Collider::Wall = *collider {break;}
+
 			}
 		}
-	
 	}
 
-
-    // check collision with walls
-    
 }
