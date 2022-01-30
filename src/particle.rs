@@ -36,13 +36,13 @@ impl Plugin for ParticlePlugin {
 			.add_system_set(
 				SystemSet::new()
 					.with_run_criteria(FixedTimestep::step(0.3))
-					// .with_system(particle_spawn)
+					.with_system(particle_spawn)
 			)
 			.add_system_set(
 				SystemSet::new()
 					.with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
 					.with_system(particle_collision_system.system())
-					// .with_system(particle_movement_system.system())
+					.with_system(particle_movement_system.system())
 			);
 	}
 }
@@ -73,7 +73,7 @@ fn particle_spawn(
 			..Default::default()
 		})
 		.insert(Particle{
-			position: pos,
+			position: pos, // TODO: remove -- this is useless
 			speed:150.,
 			velocity:vel,
 			charge,
@@ -119,36 +119,49 @@ pub fn particle_collision_system(
 
 			if let Some(collision) = collision {
 
-				// info!("COLLISION OCCURED");
 
+				if let Collider::Player = *collider {
 
-				// reflect the ball when it collides
-				let mut reflect_x = false;
-				let mut reflect_y = false;
-
-				let velocity = &mut particle.velocity;
-				// only reflect if the ball's velocity is going in the opposite direction of the
-				// collision
-				match collision {
-					Collision::Left => reflect_x = velocity.x > 0.0,
-					Collision::Right => reflect_x = velocity.x < 0.0,
-					Collision::Top => reflect_y = velocity.y < 0.0,
-					Collision::Bottom => reflect_y = velocity.y > 0.0,
 				}
 
-				// reflect velocity on the x-axis if we hit something on the x-axis
-				if reflect_x {
-					velocity.x = -velocity.x;
+				if let Collider::Particle = *collider {
+					if let collider_entity.particle.charge != particle.charge{
+							commands.entity(collider_entity).despawn();
+							commands.entity(particle_entity).despawn();
+					}
+
+
 				}
 
-				// reflect velocity on the y-axis if we hit something on the y-axis
-				if reflect_y {
-					velocity.y = -velocity.y;
-				}
 
-				// break if this collide is on a solid, otherwise continue check whether a solid is
-				// also in collision
-				if let Collider::Wall = *collider {break;}
+				if let Collider::Wall = *collider {
+					// reflect the ball when it collides
+					let mut reflect_x = false;
+					let mut reflect_y = false;
+
+					let velocity = &mut particle.velocity;
+					// only reflect if the ball's velocity is going in the opposite direction of the
+					// collision
+					match collision {
+						Collision::Left => reflect_x = velocity.x > 0.0,
+						Collision::Right => reflect_x = velocity.x < 0.0,
+						Collision::Top => reflect_y = velocity.y < 0.0,
+						Collision::Bottom => reflect_y = velocity.y > 0.0,
+					}
+
+					// reflect velocity on the x-axis if we hit something on the x-axis
+					if reflect_x {
+						velocity.x = -velocity.x;
+					}
+
+					// reflect velocity on the y-axis if we hit something on the y-axis
+					if reflect_y {
+						velocity.y = -velocity.y;
+					}
+
+					// break if this collide is on a wall,
+					break;
+				}
 
 			}
 		}

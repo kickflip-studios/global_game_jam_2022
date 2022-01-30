@@ -13,12 +13,13 @@ mod constants;
 mod player;
 mod particle;
 mod walls;
+mod scoreboard;
 
 use crate::constants::*;
 use player::{ PlayerPlugin};
 use particle::ParticlePlugin;
 use walls::spawn_walls;
-
+use scoreboard::{Scoreboard, ScorePlugin};
 
 #[derive(Component)]
 struct Charge {
@@ -38,6 +39,7 @@ fn main() {
 		.add_plugins(DefaultPlugins)
 		.add_plugin(PlayerPlugin)
 		.add_plugin(ParticlePlugin)
+		.add_plugin(ScorePlugin)
 		.add_startup_system(setup)
 		.run();
 }
@@ -80,6 +82,6 @@ fn setup(
 	let mut collider_query: Query<(Entity, &Transform, &Sprite, &Collider)>;
 
 	info!("Player sprite size: {:?}", load_image(&mut images, PLAYER_SPRITE).1);
-	info!("Particle sprite size: {:?}", load_image(&mut images, POSITRON_SPRITE));
+	info!("Particle sprite size: {:?}", load_image(&mut images, POSITRON_SPRITE).1);
 
 }
