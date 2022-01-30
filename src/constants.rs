@@ -4,8 +4,6 @@ use bevy::{
     sprite::collide_aabb::{collide, Collision},
 };
 
-use crate::constants::*;
-
 
 pub const SPRITE_DIR: &str = "assets";
 pub const PLAYER_SPRITE: &str = "player.png";

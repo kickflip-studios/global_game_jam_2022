@@ -149,9 +149,6 @@ pub fn particle_collision_system(
 				collider_size,
 			);
 
-			// info!("Checking collision bw particle and {:?}\n",collider);
-			// info!("Particle {:?} {:?}\n", particle_size, particle_transform.translation);
-			// info!("{:?} {:?} {:?}",  collider, collider_size, collider_transform.translation);
 
 			if let Some(collision) = collision {
 
@@ -161,9 +158,12 @@ pub fn particle_collision_system(
 				}
 
 				if let Collider::Particle = *collider {
-					if  collider_entity.Particle.charge != particle.charge{
-							commands.entity(collider_entity).despawn();
-							commands.entity(particle_entity).despawn();
+					let mut particle_check_query: Query<(&mut Particle)>;
+					if let Ok((collider_particle)) = particle_check_query.get_mut(collider_entity) {
+						if  collider_particle.charge != particle.charge{
+								commands.entity(collider_entity).despawn();
+								commands.entity(particle_entity).despawn();
+						}
 					}
 
 
