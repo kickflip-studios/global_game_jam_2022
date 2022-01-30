@@ -21,10 +21,6 @@ use particle::ParticlePlugin;
 use walls::spawn_walls;
 use scoreboard::{Scoreboard, ScorePlugin};
 
-#[derive(Component)]
-struct Charge {
-    value: bool,
-}
 
 fn main() {
     App::new()

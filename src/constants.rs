@@ -25,6 +25,8 @@ pub const TIME_STEP: f32 = 1. / 60.;
 pub const SCREEN_WIDTH: f32 = 600.0;
 pub const SCREEN_HEIGHT: f32 = 500.0;
 
+pub const COULOMB_CONSTANT: f32 = 10000.0;
+
 #[derive(Component)]
 pub enum Collider {
     Wall,
