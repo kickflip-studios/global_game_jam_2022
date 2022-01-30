@@ -25,7 +25,6 @@ struct Charge {
 }
 
 fn main() {
-	println!("HIII", );
     App::new()
 		.insert_resource(ClearColor(Color::rgb(1., 1., 1.)))
 		.insert_resource(WindowDescriptor {
@@ -64,11 +63,4 @@ fn setup(
 	// Position windows on your monitor
 	let mut window = windows.get_primary_mut().unwrap();
 	window.set_position(IVec2::new(1000, 0));
-
-	// spawn a sprite
-	let bottom = window.height()/2.;
-
-	// TODO: make a function in player module that is called here
-
-
 }
