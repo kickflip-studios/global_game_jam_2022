@@ -20,10 +20,6 @@ use particle::ParticlePlugin;
 use walls::spawn_walls;
 
 
-#[derive(Component)]
-struct Charge {
-    value: bool,
-}
 
 fn main() {
     App::new()
