@@ -75,7 +75,7 @@ pub fn player_movement(
 
    // bound the player within the walls
    // FIXME: this isnt quite working atm...
-   translation.x = translation.x.min(SCREEN_WIDTH).max(-SCREEN_WIDTH);
-   translation.y = translation.y.min(SCREEN_HEIGHT).max(-SCREEN_HEIGHT);
+   translation.x = translation.x.min(SCREEN_WIDTH/2. - WALL_THICKNESS ).max(-SCREEN_WIDTH/2.+ WALL_THICKNESS);
+   translation.y = translation.y.min(SCREEN_HEIGHT/2.- WALL_THICKNESS).max(-SCREEN_HEIGHT/2.+ WALL_THICKNESS);
 
 }

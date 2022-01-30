@@ -64,6 +64,7 @@ fn setup(
 ){
 	// camera
 	commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+	commands.spawn_bundle(UiCameraBundle::default());
 
 	// Position windows on your monitor
 	let mut window = windows.get_primary_mut().unwrap();
