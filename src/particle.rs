@@ -72,13 +72,8 @@ fn particle_spawn(
 			..Default::default()
 		})
 		.insert(Particle{
-<<<<<<< HEAD
-			position: pos, // TODO: remove -- this is useless
-			speed:150.,
-=======
 			position: pos,
 			// speed:150.,
->>>>>>> main
 			velocity:vel,
 			charge,
 			mass:100.
@@ -161,16 +156,12 @@ pub fn particle_collision_system(
 			if let Some(collision) = collision {
 
 
-<<<<<<< HEAD
 				if let Collider::Player = *collider {
-=======
-				// info!("COLLISION OCCURED");
->>>>>>> main
 
 				}
 
 				if let Collider::Particle = *collider {
-					if let collider_entity.particle.charge != particle.charge{
+					if  collider_entity.Particle.charge != particle.charge{
 							commands.entity(collider_entity).despawn();
 							commands.entity(particle_entity).despawn();
 					}

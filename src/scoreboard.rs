@@ -4,6 +4,7 @@ use bevy::{
 	render::texture::ImageType,
     sprite::collide_aabb::{collide, Collision},
 };
+use crate::constants::*;
 
 
 pub struct Scoreboard {
