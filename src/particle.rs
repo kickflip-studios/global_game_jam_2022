@@ -14,11 +14,10 @@ pub enum Charge {
 }
 
 
-
 #[derive(Component)]
 pub struct Particle {
 	pub position: Vec2,
-	pub speed: f32,
+	// pub speed: f32,
 	pub velocity: Vec3,
 	pub charge: Charge,
 	pub mass: f32
@@ -74,7 +73,7 @@ fn particle_spawn(
 		})
 		.insert(Particle{
 			position: pos,
-			speed:150.,
+			// speed:150.,
 			velocity:vel,
 			charge,
 			mass:100.
@@ -82,13 +81,50 @@ fn particle_spawn(
 		.insert(Collider::Particle);
 }
 
-
+// fn interact_bodies(mut query: Query<(&Mass, &GlobalTransform, &mut Acceleration)>)
 // TEMP WHILE PAUL GETS THE FORCES WORKING
-fn particle_movement_system(time: Res<Time>, mut particle_query: Query<(&Particle, &mut Transform)>) {
+fn particle_movement_system(
+	time: Res<Time>, 
+	mut query: Query<(Entity, &mut Particle, &mut Transform)>,
+) {
+	// info!("Particle movement");
     let delta_seconds = f32::min(0.2, time.delta_seconds());
-    for (particle, mut transform) in particle_query.iter_mut() {
-        transform.translation += particle.velocity * particle.speed * delta_seconds;
-    }
+	let mut iter = query.iter_combinations_mut();
+	while let Some([(id1, mut p1, mut tx1), (id2, mut p2, mut tx2)]) =
+        iter.fetch_next() {
+			// tx1.translation += p1.velocity * delta_seconds;
+			// tx2.translation += p2.velocity * delta_seconds;
+
+			let delta = tx1.translation - tx2.translation;
+			let d = delta.length();
+			if d > 0.01 {
+				let dt2 = delta_seconds.powi(2);
+				let scaled_vec = delta / d.powi(3);
+				let q1 = match p1.charge{
+					Charge::Positive => 1.0,
+					_ => -1.0,
+				};
+				let q2 = match p2.charge{
+					Charge::Positive => 1.0,
+					_ => -1.0,
+				};
+				let force = COULOMB_CONSTANT* q1 * q2 * scaled_vec;
+				let a1 = force/p1.mass;
+				let a2 = -force/p2.mass;
+				let dv1 = a1 * delta_seconds;
+				let dv2= a2 * delta_seconds;
+				let dx1 = p1.velocity * delta_seconds + 0.5 * a1 * dt2;
+				let dx2 = p2.velocity * delta_seconds + 0.5 * a2 * dt2;
+				tx1.translation += dx1;
+				tx2.translation += dx2;
+				p1.velocity += dv1;
+				p2.velocity += dv2;
+				// info!("(p1,p2) = ({:?},{:?}), v1={:?}, v2={:?}",id1,id2, p1.velocity, p2.velocity);
+
+			}
+			
+		}
+	
 }
 
 
@@ -110,7 +146,7 @@ pub fn particle_collision_system(
 			);
 			if let Some(collision) = collision {
 	
-				info!("Collision occured! ", );
+				// info!("Collision occured! ", );
 	
 				// if collision with another particle
 				if let Collider::Particle = *collider {

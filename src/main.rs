@@ -22,7 +22,7 @@ use walls::spawn_walls;
 
 #[derive(Component)]
 struct Charge {
-    value: bool,
+    value: f32,
 }
 
 fn main() {
