@@ -41,7 +41,7 @@ impl Plugin for ParticlePlugin {
 			.add_system_set(
 				SystemSet::new()
 					.with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-					// .with_system(particle_collision_system.system())
+					.with_system(particle_collision_system.system())
 					.with_system(particle_movement_system.system())
 			);
 	}
@@ -76,7 +76,7 @@ fn particle_spawn(
 			position: pos,
 			speed:150.,
 			velocity:vel,
-			charge:charge,
+			charge,
 			mass:100.
 		})
 		.insert(Collider::Particle);
