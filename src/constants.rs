@@ -5,12 +5,22 @@ use bevy::{
 };
 
 
-pub const SPRITE_DIR: &str = "/";
+// pub const SPRITE_DIR: &str = "/";
 pub const PLAYER_SPRITE: &str = "player.png";
+pub const PLAYER_SPRITE_X: usize = 202;
+pub const PLAYER_SPRITE_Y: usize = 202;
 pub const ELECTRON_SPRITE: &str = "electron.png";
+pub const ELECTRON_SPRITE_X: usize = 191;
+pub const ELECTRON_SPRITE_Y: usize = 191;
 pub const POSITRON_SPRITE: &str = "positron.png";
+pub const POSITRON_SPRITE_X: usize = 191;
+pub const POSITRON_SPRITE_Y: usize = 191;
 pub const SPHERE_SPRITE: &str = "charge_sphere.png";
+pub const SPHERE_SPRITE_X: usize = 191;
+pub const SPHERE_SPRITE_Y: usize = 189;
 pub const BACKGROUND_SPRITE: &str = "backgound.png";
+pub const BACKGROUND_SPRITE_X: usize = 2002;
+pub const BACKGROUND_SPRITE_Y: usize = 1125;
 
 
 pub const WALL_THICKNESS: f32 = 10.;
