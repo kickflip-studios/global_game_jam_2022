@@ -30,6 +30,7 @@ pub struct ParticlePlugin;
 
 impl Plugin for ParticlePlugin {
 	fn build(&self, app: &mut bevy::prelude::App) {
+		info!("Building ParticlePlugin");
 		app
 			.add_startup_system(particle_spawn)
 			.add_system_set(
@@ -50,7 +51,7 @@ fn particle_spawn(
 	mut commands: Commands,
 	asset_server: Res<AssetServer>,
 ) {
-
+	info!("Spawning particles");
 	let mut rng = thread_rng();
 	let charge_bool = rng.gen::<bool>();
 	let charge = if charge_bool {Charge::Positive} else {Charge::Negative};
@@ -87,7 +88,7 @@ fn particle_movement_system(
 	time: Res<Time>,
 	mut query: Query<(Entity, &mut Particle, &mut Transform)>,
 ) {
-	// info!("Particle movement");
+	info!("Particle movement");
     let delta_seconds = f32::min(0.2, time.delta_seconds());
 	let mut iter = query.iter_combinations_mut();
 	while let Some([(id1, mut p1, mut tx1), (id2, mut p2, mut tx2)]) =
@@ -134,6 +135,7 @@ pub fn particle_collision_system(
     mut particle_query: Query<(Entity, &Transform, &Sprite,  &mut Particle  ), (With<Particle>)>,
     mut collider_query: Query<(Entity, &Transform, &Sprite, &Collider)>,
 	) {
+		info!("Particles collision system");
     for (particle_entity, particle_transform, particle_sprite, mut particle) in particle_query.iter_mut(){
 		let particle_size = sprite_infos.particle.1 *  particle_transform.scale.truncate();
 		for (mut collider_entity, collider_transform, collider_sprite, collider, ) in collider_query.iter_mut() {
