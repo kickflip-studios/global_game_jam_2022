@@ -46,9 +46,9 @@ fn main() {
 fn load_image(images: &mut ResMut<Assets<Image>>, path: &str) -> (Handle<Image>, Vec2) {
 	// Note - With bevy v0.6, load images directly and synchronously to capture size
 	//        See https://github.com/bevyengine/bevy/pull/3696
-	console::log_1(&format("Loading {}", path).into());
+	console::log_1(&format!("Loading {}", path).into());
 	let path = Path::new(SPRITE_DIR).join(path);
-	let bytes = std::fs::read(&path).unwrap_or_else(|_| panic!("Cannot find {}", path.display()));
+	let bytes = std::fs::read(&path).unwrap_or_else(|_| panic!("Cannot find {:?}", path));
 	let image = Image::from_buffer(&bytes, ImageType::MimeType("image/png")).unwrap();
 	let size = image.texture_descriptor.size;
 	let size = Vec2::new(size.width as f32, size.height as f32);
