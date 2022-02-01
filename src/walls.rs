@@ -3,10 +3,10 @@ use bevy::prelude::*;
 use crate::constants::*;
 
 pub fn spawn_walls(
-	mut commands: Commands,
-	asset_server: Res<AssetServer>,
-	mut materials: ResMut<Assets<ColorMaterial>>,)
-{
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
     // Add walls
     let wall_color = Color::rgb(0.8, 0.8, 0.8);
     let wall_thickness = WALL_THICKNESS;

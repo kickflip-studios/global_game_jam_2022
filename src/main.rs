@@ -1,33 +1,32 @@
-
 #![allow(unused)]
 
 use bevy::{
     core::FixedTimestep,
     prelude::*,
-	render::texture::ImageType,
+    render::texture::ImageType,
     sprite::collide_aabb::{collide, Collision},
 	asset::AssetServerSettings
 };
 use std::path::Path;
 
 mod constants;
-mod player;
 mod particle;
+mod player;
+mod scoreboard;
 mod walls;
 
 use crate::constants::*;
-use player::{ PlayerPlugin};
 use particle::ParticlePlugin;
+use player::PlayerPlugin;
+use scoreboard::ScorePlugin;
 use walls::spawn_walls;
-
-
 
 fn main() {
     App::new()
 		.insert_resource(AssetServerSettings {
 			asset_folder: "/".to_string(),
 		})
-		.insert_resource(ClearColor(Color::rgb(1., 1., 1.)))
+		.insert_resource(ClearColor(Color::BLACK))
 		.insert_resource(WindowDescriptor {
 			title: "Global game jam 2022".to_string(),
 			width: constants::SCREEN_WIDTH,
@@ -38,7 +37,9 @@ fn main() {
 		.add_plugins(DefaultPlugins)
 		.add_plugin(PlayerPlugin)
 		.add_plugin(ParticlePlugin)
+		.add_plugin(ScorePlugin)
 		.add_startup_system(setup)
+		.add_system(bevy::input::system::exit_on_esc_system)
 		.run();
 }
 
