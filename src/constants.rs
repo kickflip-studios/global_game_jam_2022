@@ -5,7 +5,7 @@ use bevy::{
 };
 
 
-pub const SPRITE_DIR: &str = "assets";
+pub const SPRITE_DIR: &str = "/";
 pub const PLAYER_SPRITE: &str = "player.png";
 pub const ELECTRON_SPRITE: &str = "electron.png";
 pub const POSITRON_SPRITE: &str = "positron.png";
