@@ -15,22 +15,24 @@ pub struct ActiveParticles {
     pub total: u32,
 }
 
-fn increase_particle_count(mut particle_count: ResMut<ActiveParticles>, mut charge: f32)
+fn increase_particle_count(mut particle_count: ResMut<ActiveParticles>, mut charge: f32) -> ResMut<ActiveParticles>
 {
     if charge < 0.
     {particle_count.electrons += 1;}
     else
     {particle_count.positrons += 1;}
     particle_count.total = particle_count.positrons + particle_count.electrons;
+    particle_count
 }
 
-fn decrease_particle_count(mut particle_count: ResMut<ActiveParticles>, mut charge: f32)
+fn decrease_particle_count( mut particle_count: ResMut<ActiveParticles>, mut charge: f32) -> ResMut<ActiveParticles>
 {
     if charge < 0.
     {particle_count.electrons -= 1;}
     else
     {particle_count.positrons -= 1;}
     particle_count.total = particle_count.positrons + particle_count.electrons;
+    particle_count
 }
 
 pub struct ParticlePlugin;
@@ -66,6 +68,7 @@ fn particle_spawn(
         let mut rng = thread_rng();
         let mut charge_bool = rng.gen::<bool>();
 
+        #[warn(clippy::if_same_then_else)]
         if particle_count.positrons == MAX_NUM_PARTICLES -1
         {
             charge_bool = false; // force next particle --> electron
@@ -85,7 +88,7 @@ fn particle_spawn(
             charge = -1.;
             sprite_file = ELECTRON_SPRITE;
           }
-        increase_particle_count(particle_count, charge);
+          particle_count = increase_particle_count(particle_count, charge);
 
         // slow init vel so as to not kill player immediatly on spawn
         let vel = Vec3::new(
@@ -272,8 +275,8 @@ pub fn particle_particle_collision_system(
                 commands.entity(id2).despawn();
 
                 // update counts
-                decrease_particle_count(particle_count, p1.charge);
-                decrease_particle_count(particle_count, p2.charge);
+                particle_count = decrease_particle_count(particle_count, p1.charge);
+                particle_count = decrease_particle_count(particle_count, p2.charge);
 
             }
         }
