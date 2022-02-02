@@ -22,7 +22,8 @@ fn increase_particle_count(mut particle_count: ResMut<ActiveParticles>, mut char
     else
     {particle_count.positrons += 1;}
     particle_count.total = particle_count.positrons + particle_count.electrons;
-    particle_count
+
+    return particle_count
 }
 
 fn decrease_particle_count( mut particle_count: ResMut<ActiveParticles>, mut charge: f32) -> ResMut<ActiveParticles>
@@ -32,8 +33,17 @@ fn decrease_particle_count( mut particle_count: ResMut<ActiveParticles>, mut cha
     else
     {particle_count.positrons -= 1;}
     particle_count.total = particle_count.positrons + particle_count.electrons;
-    particle_count
+
+    return particle_count
 }
+
+pub fn zero_count(mut particle_count: ResMut<ActiveParticles>)
+{
+    particle_count.total = 0;
+    particle_count.electrons = 0;
+    particle_count.positrons = 0;
+}
+
 
 pub struct ParticlePlugin;
 
@@ -44,6 +54,14 @@ impl Plugin for ParticlePlugin {
                 SystemSet::on_update(GameState::Playing)
                     .with_run_criteria(FixedTimestep::step(0.3))
                     .with_system(particle_spawn),
+            )
+            .add_system_set(
+                SystemSet::on_enter(GameState::Playing)
+                    .with_system(zero_count)
+            )
+            .add_system_set(
+                SystemSet::on_enter(GameState::GameOver)
+                    .with_system(zero_count)
             )
             .add_system_set(
                 SystemSet::on_update(GameState::Playing)
