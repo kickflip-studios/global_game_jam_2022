@@ -88,7 +88,9 @@ fn particle_spawn(
             charge = -1.;
             sprite_file = ELECTRON_SPRITE;
           }
+          info!("particle_count before increase = {:?}, {:?}", particle_count.electrons, particle_count.positrons);
           particle_count = increase_particle_count(particle_count, charge);
+          info!("particle_count after increase = {:?}, {:?}", particle_count.electrons, particle_count.positrons);
 
         // slow init vel so as to not kill player immediatly on spawn
         let vel = Vec3::new(
@@ -275,8 +277,10 @@ pub fn particle_particle_collision_system(
                 commands.entity(id2).despawn();
 
                 // update counts
+                info!("particle_count before decrease by 2 = {:?}, {:?}", particle_count.electrons, particle_count.positrons);
                 particle_count = decrease_particle_count(particle_count, p1.charge);
                 particle_count = decrease_particle_count(particle_count, p2.charge);
+                info!("particle_count after decrease by 2 = {:?}, {:?}", particle_count.electrons, particle_count.positrons);
 
             }
         }
