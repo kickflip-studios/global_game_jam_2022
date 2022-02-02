@@ -2,6 +2,20 @@ use bevy::prelude::*;
 
 use crate::constants::*;
 
+pub struct WallsPlugin;
+
+impl Plugin for WallsPlugin {
+    fn build(&self, app: &mut bevy::prelude::App) {
+        app
+            .add_system_set(
+                SystemSet::on_enter(GameState::Playing)
+                .with_system(spawn_walls)
+            );
+    }
+}
+
+
+
 pub fn spawn_walls(
     mut commands: Commands,
     asset_server: Res<AssetServer>,

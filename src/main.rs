@@ -11,14 +11,14 @@ use std::path::Path;
 mod constants;
 mod particle;
 mod player;
-mod scoreboard;
+mod ui;
 mod walls;
 
 use crate::constants::*;
 use particle::ParticlePlugin;
 use player::PlayerPlugin;
-use scoreboard::ScorePlugin;
-use walls::spawn_walls;
+use ui::UiPlugin;
+use walls::WallsPlugin;
 
 fn main() {
     App::new()
@@ -29,12 +29,16 @@ fn main() {
             height: constants::SCREEN_HEIGHT,
             ..Default::default()
         })
-        .add_startup_system(spawn_walls)
         .add_plugins(DefaultPlugins)
         .add_plugin(PlayerPlugin)
         .add_plugin(ParticlePlugin)
-        .add_plugin(ScorePlugin)
-        .add_startup_system(setup)
+        .add_plugin(UiPlugin)
+        .add_plugin(WallsPlugin)
+        .add_state(GameState::Playing)
+        .add_system_set(SystemSet::on_enter(GameState::Playing).with_system(setup))
+        .add_system_set(SystemSet::on_exit(GameState::Playing).with_system(teardown))
+        .add_system_set(SystemSet::on_update(GameState::GameOver).with_system(gameover_keyboard))
+        .add_system_set(SystemSet::on_exit(GameState::GameOver).with_system(teardown))
         .add_system(bevy::input::system::exit_on_esc_system)
         .run();
 }
@@ -51,6 +55,22 @@ fn load_image(images: &mut ResMut<Assets<Image>>, path: &str) -> (Handle<Image>,
     (image_handle, size)
 }
 
+// remove all entities that are not a camera
+fn teardown(mut commands: Commands, entities: Query<Entity, Without<Camera>>) {
+    for entity in entities.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
+}
+
+// restart the game when pressing r
+fn gameover_keyboard(mut state: ResMut<State<GameState>>, keyboard_input: Res<Input<KeyCode>>) {
+    if keyboard_input.just_pressed(KeyCode::R) {
+        state.set(GameState::Playing).unwrap();
+    }
+}
+
+
+
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -60,6 +80,7 @@ fn setup(
 ) {
     // camera
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+    commands.spawn_bundle(UiCameraBundle::default());
     commands.spawn_bundle(UiCameraBundle::default());
 
     // Position windows on your monitor

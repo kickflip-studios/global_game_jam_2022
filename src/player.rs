@@ -11,8 +11,15 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_startup_system(player_spawn)
-            .add_system(player_movement);
+        app
+            .add_system_set(
+                SystemSet::on_enter(GameState::Playing)
+                .with_system(player_spawn)
+            )
+            .add_system_set(
+                SystemSet::on_update(GameState::Playing)
+                .with_system(player_movement)
+            );
     }
 }
 
@@ -42,9 +49,13 @@ pub fn player_spawn(
 
 pub fn player_movement(
     mut commands: Commands,
+    mut game_state: ResMut<State<GameState>>,
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<(&Player, &mut Transform)>,
 ) {
+    if *game_state.current() != GameState::Playing {
+        return;
+    }
     let (player, mut transform) = query.single_mut();
     let mut direction = Vec2::new(0.0, 0.0);
     if keyboard_input.pressed(KeyCode::Left) {

@@ -14,6 +14,9 @@ pub const BACKGROUND_SPRITE: &str = "backgound.png";
 pub const NORMAL_FONT: &str = "fonts/FiraSans-Medium.ttf";
 pub const BOLD_FONT: &str = "fonts/FiraSans-Bold.ttf";
 
+pub const GAME_OVER_MAIN: &str = "Game Over!";
+pub const GAME_OVER_MINOR: &str ="Press r to restart";
+
 pub const MAX_NUM_PARTICLES: u32 = 10;
 
 pub const WALL_THICKNESS: f32 = 10.;
@@ -30,16 +33,24 @@ pub const VELOCITY_SCALE: f32 = 0.0;
 
 pub const MAXIMUM_SPEED: f32 = 10.0 * WALL_THICKNESS / TIME_STEP;
 
-#[derive(Component)]
+#[derive(Component,PartialEq)]
 pub enum Collider {
     Wall,
     Particle,
     Player,
 }
 
+#[derive(Component)]
 pub struct Scoreboard {
     pub score: usize,
 }
+
+#[derive(Clone, Eq, PartialEq, Debug, Hash)]
+pub enum GameState {
+    Playing,
+    GameOver
+}
+
 
 // region:    Resources
 pub struct SpriteInfos {
