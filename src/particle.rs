@@ -9,13 +9,37 @@ use rand::{random, thread_rng, Rng};
 
 use crate::constants::*;
 
-pub struct ActiveParticles(u32);
+pub struct ActiveParticles {
+    pub positrons: u32,
+    pub electrons: u32,
+    pub total: u32,
+}
+
+fn increase_particle_count(mut particle_count: ResMut<ActiveParticles>, mut charge: f32) -> ResMut<ActiveParticles>
+{
+    if charge < 0.
+    {particle_count.electrons += 1;}
+    else
+    {particle_count.positrons += 1;}
+    particle_count.total = particle_count.positrons + particle_count.electrons;
+    particle_count
+}
+
+fn decrease_particle_count( mut particle_count: ResMut<ActiveParticles>, mut charge: f32) -> ResMut<ActiveParticles>
+{
+    if charge < 0.
+    {particle_count.electrons -= 1;}
+    else
+    {particle_count.positrons -= 1;}
+    particle_count.total = particle_count.positrons + particle_count.electrons;
+    particle_count
+}
 
 pub struct ParticlePlugin;
 
 impl Plugin for ParticlePlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.insert_resource(ActiveParticles(0))
+        app.insert_resource(ActiveParticles{positrons:0, electrons:0, total:0})
             .add_system_set(
                 SystemSet::on_update(GameState::Playing)
                     .with_run_criteria(FixedTimestep::step(0.3))
@@ -31,9 +55,13 @@ impl Plugin for ParticlePlugin {
     }
 }
 
+
+
+
+
 fn particle_spawn(
     mut commands: Commands,
-    mut active_particles: ResMut<ActiveParticles>,
+    mut particle_count: ResMut<ActiveParticles>,
     mut game_state: ResMut<State<GameState>>,
     asset_server: Res<AssetServer>,
 ) {
@@ -42,18 +70,38 @@ fn particle_spawn(
         return;
     }
 
-    if active_particles.0 < MAX_NUM_PARTICLES {
+    if particle_count.total < MAX_NUM_PARTICLES {
         let mut rng = thread_rng();
-        let charge_bool = rng.gen::<bool>();
-        let charge = if charge_bool { 1. } else { -1. };
-        let sprite_file = if charge_bool {
-            POSITRON_SPRITE
-        } else {
-            ELECTRON_SPRITE
-        };
+        let mut charge_bool = rng.gen::<bool>();
+
+        #[warn(clippy::if_same_then_else)]
+        if particle_count.positrons == MAX_NUM_PARTICLES -1
+        {
+            charge_bool = false; // force next particle --> electron
+        }
+        else if particle_count.electrons == MAX_NUM_PARTICLES -1
+        {
+            charge_bool = true; // force next particle --> positron
+        }
+
+        let mut charge = 0. ;
+        let mut sprite_file = "";
+        if charge_bool {
+            charge = 1.;
+            sprite_file = POSITRON_SPRITE;
+         }
+         else {
+            charge = -1.;
+            sprite_file = ELECTRON_SPRITE;
+          }
+          info!("particle_count before increase = {:?}, {:?}", particle_count.electrons, particle_count.positrons);
+          particle_count = increase_particle_count(particle_count, charge);
+          info!("particle_count after increase = {:?}, {:?}", particle_count.electrons, particle_count.positrons);
+
+        // slow init vel so as to not kill player immediatly on spawn
         let vel = Vec3::new(
-            rng.gen_range(-1.0..1.0) as f32,
-            rng.gen_range(-1.0..1.0) as f32,
+            rng.gen_range(-0.1..0.1) as f32,
+            rng.gen_range(-0.1..0.1) as f32,
             0.,
         )
         .normalize()
@@ -78,8 +126,7 @@ fn particle_spawn(
                 mass: 1.,
             })
             .insert(Collider::Particle);
-        active_particles.0 += 1;
-        info!("Added another particle (now {:?})", active_particles.0)
+
     }
 }
 
@@ -195,7 +242,7 @@ pub fn particle_wall_collision_system(
 
 pub fn particle_particle_collision_system(
     mut commands: Commands,
-    mut active_particles: ResMut<ActiveParticles>,
+    mut particle_count: ResMut<ActiveParticles>,
     mut app_exit_events: ResMut<Events<bevy::app::AppExit>>,
     sprite_infos: Res<SpriteInfos>,
     mut scoreboard: ResMut<Scoreboard>,
@@ -231,10 +278,16 @@ pub fn particle_particle_collision_system(
                     scoreboard.score += 1;
                     info!("INCREASE SCORE = {}", scoreboard.score);
                 }
-
+                // delete particles
                 commands.entity(id1).despawn();
                 commands.entity(id2).despawn();
-                active_particles.0 -= 2; // this will allow more to spawn
+
+                // update counts
+                info!("particle_count before decrease by 2 = {:?}, {:?}", particle_count.electrons, particle_count.positrons);
+                particle_count = decrease_particle_count(particle_count, p1.charge);
+                particle_count = decrease_particle_count(particle_count, p2.charge);
+                info!("particle_count after decrease by 2 = {:?}, {:?}", particle_count.electrons, particle_count.positrons);
+
             }
         }
     }

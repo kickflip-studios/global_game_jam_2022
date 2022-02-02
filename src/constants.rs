@@ -29,7 +29,7 @@ pub const SCREEN_HEIGHT: f32 = 500.0;
 
 pub const COULOMB_CONSTANT: f32 = 50000.0;
 
-pub const VELOCITY_SCALE: f32 = 0.0;
+pub const VELOCITY_SCALE: f32 = 1.0;
 
 pub const MAXIMUM_SPEED: f32 = 10.0 * WALL_THICKNESS / TIME_STEP;
 
