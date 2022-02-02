@@ -17,12 +17,12 @@ impl Plugin for ParticlePlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.insert_resource(ActiveParticles(0))
             .add_system_set(
-                SystemSet::new()
+                SystemSet::on_update(GameState::Playing)
                     .with_run_criteria(FixedTimestep::step(0.3))
                     .with_system(particle_spawn),
             )
             .add_system_set(
-                SystemSet::new()
+                SystemSet::on_update(GameState::Playing)
                     .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
                     .with_system(particle_wall_collision_system.system())
                     .with_system(particle_particle_collision_system.system())
@@ -34,8 +34,14 @@ impl Plugin for ParticlePlugin {
 fn particle_spawn(
     mut commands: Commands,
     mut active_particles: ResMut<ActiveParticles>,
+    mut game_state: ResMut<State<GameState>>,
     asset_server: Res<AssetServer>,
 ) {
+
+    if *game_state.current() != GameState::Playing {
+        return;
+    }
+
     if active_particles.0 < MAX_NUM_PARTICLES {
         let mut rng = thread_rng();
         let charge_bool = rng.gen::<bool>();
@@ -193,6 +199,7 @@ pub fn particle_particle_collision_system(
     mut app_exit_events: ResMut<Events<bevy::app::AppExit>>,
     sprite_infos: Res<SpriteInfos>,
     mut scoreboard: ResMut<Scoreboard>,
+    mut game_state: ResMut<State<GameState>>,
     mut query: Query<(
         Entity,
         &mut Particle,
@@ -215,17 +222,14 @@ pub fn particle_particle_collision_system(
         );
         if let Some(collision) = collision {
             if p2.charge != p1.charge {
-                if let Collider::Player = *c1 {
+                if Collider::Player == *c1 || Collider::Player == *c2{
                     info!("END GAME");
-                    app_exit_events.send(AppExit);
-                } else if let Collider::Player = *c2 {
-                    info!("END GAME");
-                    app_exit_events.send(AppExit);
-                } else {
-                    // info!("INCREASE SCORE");
+                    // app_exit_events.send(AppExit);
+                     let _ = game_state.overwrite_set(GameState::GameOver);
+                }
+                else {
                     scoreboard.score += 1;
                     info!("INCREASE SCORE = {}", scoreboard.score);
-
                 }
 
                 commands.entity(id1).despawn();
