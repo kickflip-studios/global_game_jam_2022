@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::constants::*;
+use crate::{constants::*, particle::ActiveParticles};
 
 #[derive(Component)]
 pub struct Player {
@@ -37,6 +37,7 @@ pub fn player_spawn(
             velocity: Vec3::ZERO,
             charge: -1.,
             mass: 1.,
+            active: true,
         });
 }
 
@@ -75,3 +76,4 @@ pub fn player_movement(
         .min(SCREEN_HEIGHT / 2. - WALL_THICKNESS)
         .max(-SCREEN_HEIGHT / 2. + WALL_THICKNESS);
 }
+

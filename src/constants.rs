@@ -14,14 +14,14 @@ pub const BACKGROUND_SPRITE: &str = "backgound.png";
 pub const NORMAL_FONT: &str = "fonts/FiraSans-Medium.ttf";
 pub const BOLD_FONT: &str = "fonts/FiraSans-Bold.ttf";
 
-pub const MAX_NUM_PARTICLES: u32 = 10;
+pub const MAX_NUM_PARTICLES: u32 = 4;
 
 pub const WALL_THICKNESS: f32 = 10.;
 
 pub const SCALE: f32 = 0.1;
 pub const TIME_STEP: f32 = 1. / 60.;
 
-pub const SCREEN_WIDTH: f32 = 600.0;
+pub const SCREEN_WIDTH: f32 = 1600.0;
 pub const SCREEN_HEIGHT: f32 = 500.0;
 
 pub const COULOMB_CONSTANT: f32 = 50000.0;
@@ -52,4 +52,5 @@ pub struct Particle {
     pub velocity: Vec3,
     pub charge: f32,
     pub mass: f32,
+    pub active: bool,
 }
