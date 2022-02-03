@@ -9,6 +9,7 @@ use rand::{random, thread_rng, Rng};
 
 use crate::constants::*;
 
+#[derive(Component)]
 pub struct ActiveParticles {
     pub positrons: u32,
     pub electrons: u32,
@@ -68,9 +69,12 @@ impl Plugin for ParticlePlugin {
                     .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
                     .with_system(particle_wall_collision_system.system())
                     .with_system(particle_particle_collision_system.system())
-                    .with_system(particle_movement_system.system()),
+                    .with_system(particle_movement_system.system())
+                    .with_system(log_all_particles)
+
             );
     }
+
 }
 
 
@@ -92,15 +96,15 @@ fn particle_spawn(
         let mut rng = thread_rng();
         let mut charge_bool = rng.gen::<bool>();
 
-        #[warn(clippy::if_same_then_else)]
-        if particle_count.positrons == MAX_NUM_PARTICLES -1
-        {
-            charge_bool = false; // force next particle --> electron
-        }
-        else if particle_count.electrons == MAX_NUM_PARTICLES -1
-        {
-            charge_bool = true; // force next particle --> positron
-        }
+        let charge_bool = match(particle_count.positrons == 0, particle_count.electrons == 0 ) {
+            (true, false) => {
+                info!("No positrons, increasing positron count next");
+                true}, // no positrons, create positron
+            (false, true) => {
+                info!("No electrons, increasing electron count next");
+                false}, // no electrons, create electron
+            _ => rng.gen::<bool>(),
+        };
 
         let mut charge = 0. ;
         let mut sprite_file = "";
@@ -142,6 +146,7 @@ fn particle_spawn(
                 velocity: vel,
                 charge,
                 mass: 1.,
+                active: true,
             })
             .insert(Collider::Particle);
 
@@ -297,6 +302,8 @@ pub fn particle_particle_collision_system(
                     info!("INCREASE SCORE = {}", scoreboard.score);
                 }
                 // delete particles
+                p1.active = false;
+                p2.active = false;
                 commands.entity(id1).despawn();
                 commands.entity(id2).despawn();
 
@@ -308,5 +315,23 @@ pub fn particle_particle_collision_system(
 
             }
         }
+    }
+}
+
+pub fn log_all_particles(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<(&Particle, &Transform,)>,
+) {
+    if keyboard_input.pressed(KeyCode::Space) {
+        info!("*****************************");
+        let mut iter = query.iter_mut();
+        for (p, tf) in iter{
+            if p.active {
+                let x = tf.translation.x;
+                let y = tf.translation.y;
+                info!("(x,y,Q)=({},{},{})",x,y,p.charge);
+            }
+        }
+        info!("*****************************");
     }
 }
