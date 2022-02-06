@@ -5,6 +5,8 @@ use bevy::{
     prelude::*,
     sprite::collide_aabb::{collide, Collision},
 };
+use rand::prelude::ThreadRng;
+use crate::player::Player;
 use rand::{random, thread_rng, Rng};
 
 use crate::constants::*;
@@ -16,6 +18,40 @@ pub struct ActiveParticles {
     pub total: u32,
 }
 
+
+fn get_velocity(rng: &ThreadRng) -> Vec3 {
+    Vec3::new(
+        rng.clone().gen_range(-0.1..0.1) as f32,
+        rng.clone().gen_range(-0.1..0.1) as f32,
+        0.,
+    )
+}
+
+fn get_unit_velocity(rng: &ThreadRng) -> Vec3 {
+    let mut v  = get_velocity(rng);
+    while v.length() == 0.0 {
+       v = get_velocity(rng);
+    };
+    v.normalize() * VELOCITY_SCALE
+}
+
+fn random_spawn(rng: &ThreadRng) -> Vec2 {
+    Vec2::new(
+        rng.clone().gen_range(-ACTIVE_WIDTH / 2.0 + 20.0..ACTIVE_WIDTH / 2.0 - 20.0),
+        rng.clone().gen_range(-ACTIVE_HEIGHT / 2.0 + 20.0..ACTIVE_HEIGHT / 2.0 - 20.0),
+    )
+}
+
+fn get_spawn_location(rng: &ThreadRng, player_pos: &Vec2) -> Vec2 {
+    let mut pos = random_spawn(rng);
+    let mut dist_to_player = (pos - *player_pos).length();
+    while dist_to_player < EXCLUSION_RADIUS {
+        pos = random_spawn(rng);
+        dist_to_player = (pos - *player_pos).length();
+    };
+    pos
+}
+
 fn increase_particle_count(mut particle_count: ResMut<ActiveParticles>, mut charge: f32) -> ResMut<ActiveParticles>
 {
     if charge < 0.
@@ -24,7 +60,7 @@ fn increase_particle_count(mut particle_count: ResMut<ActiveParticles>, mut char
     {particle_count.positrons += 1;}
     particle_count.total = particle_count.positrons + particle_count.electrons;
 
-    return particle_count
+    particle_count
 }
 
 fn decrease_particle_count( mut particle_count: ResMut<ActiveParticles>, mut charge: f32) -> ResMut<ActiveParticles>
@@ -35,7 +71,7 @@ fn decrease_particle_count( mut particle_count: ResMut<ActiveParticles>, mut cha
     {particle_count.positrons -= 1;}
     particle_count.total = particle_count.positrons + particle_count.electrons;
 
-    return particle_count
+    particle_count
 }
 
 pub fn zero_count(mut particle_count: ResMut<ActiveParticles>)
@@ -71,7 +107,6 @@ impl Plugin for ParticlePlugin {
                     .with_system(particle_particle_collision_system.system())
                     .with_system(particle_movement_system.system())
                     .with_system(log_all_particles)
-
             );
     }
 
@@ -85,6 +120,7 @@ fn particle_spawn(
     mut commands: Commands,
     mut particle_count: ResMut<ActiveParticles>,
     mut game_state: ResMut<State<GameState>>,
+    mut query: Query<(&Player, &Transform)>,
     asset_server: Res<AssetServer>,
 ) {
 
@@ -92,64 +128,64 @@ fn particle_spawn(
         return;
     }
 
-    if particle_count.total < MAX_NUM_PARTICLES {
+    if particle_count.total < MAX_NUM_PARTICLES - 2 && *game_state.current() == GameState::Playing {
+        let (player, transform) = query.single();
+        let player_location = Vec2::new(transform.translation.x,transform.translation.y);
         let mut rng = thread_rng();
-        let mut charge_bool = rng.gen::<bool>();
-
-        let charge_bool = match(particle_count.positrons == 0, particle_count.electrons == 0 ) {
-            (true, false) => {
-                info!("No positrons, increasing positron count next");
-                true}, // no positrons, create positron
-            (false, true) => {
-                info!("No electrons, increasing electron count next");
-                false}, // no electrons, create electron
-            _ => rng.gen::<bool>(),
-        };
-
-        let mut charge = 0. ;
         let mut sprite_file = "";
-        if charge_bool {
-            charge = 1.;
-            sprite_file = POSITRON_SPRITE;
-         }
-         else {
-            charge = -1.;
-            sprite_file = ELECTRON_SPRITE;
-          }
-          info!("particle_count before increase = {:?}, {:?}", particle_count.electrons, particle_count.positrons);
-          particle_count = increase_particle_count(particle_count, charge);
-          info!("particle_count after increase = {:?}, {:?}", particle_count.electrons, particle_count.positrons);
+        info!("particle_count before increase = {:?}, {:?}", particle_count.electrons, particle_count.positrons);
+        let v = get_unit_velocity(&rng); // get the initial velocity of the positron
 
-        // slow init vel so as to not kill player immediatly on spawn
-        let vel = Vec3::new(
-            rng.gen_range(-0.1..0.1) as f32,
-            rng.gen_range(-0.1..0.1) as f32,
-            0.,
-        )
-        .normalize()
-            * VELOCITY_SCALE;
-        let pos = Vec2::new(
-            rng.gen_range(-SCREEN_WIDTH / 2.0..SCREEN_WIDTH / 2.0) as f32,
-            rng.gen_range(-SCREEN_HEIGHT / 2.0..SCREEN_HEIGHT / 2.0) as f32,
-        );
+        let charge = 1.;
+        sprite_file = POSITRON_SPRITE;
+        let pos = get_spawn_location(&rng, &player_location);
+
         commands
-            .spawn_bundle(SpriteBundle {
-                texture: asset_server.load(sprite_file),
-                transform: Transform {
-                    translation: Vec3::new(pos.x, pos.y, 0.),
-                    scale: Vec3::new(SCALE, SCALE, 1.),
-                    ..Default::default()
-                },
+        .spawn_bundle(SpriteBundle {
+            texture: asset_server.load(sprite_file),
+            transform: Transform {
+                translation: Vec3::new(pos.x, pos.y, 0.),
+                scale: Vec3::new(SCALE, SCALE, 1.),
                 ..Default::default()
-            })
-            .insert(Particle {
-                velocity: vel,
-                charge,
-                mass: 1.,
-                active: true,
-            })
-            .insert(Collider::Particle);
+            },
+            ..Default::default()
+        })
+        .insert(Particle {
+            velocity: v,
+            charge,
+            mass: 1.,
+            active: true,
+        })
+        .insert(Collider::Particle);
+        particle_count = increase_particle_count(particle_count, charge);
 
+        let charge = -1.;
+        sprite_file = ELECTRON_SPRITE;
+        let pos = get_spawn_location(&rng, &player_location);
+        
+        commands
+        .spawn_bundle(SpriteBundle {
+            texture: asset_server.load(sprite_file),
+            transform: Transform {
+                translation: Vec3::new(pos.x, pos.y, 0.),
+                scale: Vec3::new(SCALE, SCALE, 1.),
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .insert(Particle {
+            velocity: -v, // opposite velocity to the positron
+            charge,
+            mass: 1.,
+            active: true,
+        })
+        .insert(Collider::Particle);
+        particle_count = increase_particle_count(particle_count, charge);
+
+
+        info!("particle_count after increase = {:?}, {:?}", particle_count.electrons, particle_count.positrons);
+
+    
     }
 }
 

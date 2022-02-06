@@ -17,21 +17,29 @@ pub const BOLD_FONT: &str = "fonts/FiraSans-Bold.ttf";
 pub const GAME_OVER_MAIN: &str = "Game Over!";
 pub const GAME_OVER_MINOR: &str ="Press r to restart";
 
-pub const MAX_NUM_PARTICLES: u32 = 10;
+pub const MAX_NUM_PARTICLES: u32 = 20;
 
 pub const WALL_THICKNESS: f32 = 10.;
 
 pub const SCALE: f32 = 0.1;
 pub const TIME_STEP: f32 = 1. / 60.;
 
-pub const SCREEN_WIDTH: f32 = 1600.0;
-pub const SCREEN_HEIGHT: f32 = 500.0;
+pub const ACTIVE_WIDTH: f32 = 1400.0;
+pub const ACTIVE_HEIGHT: f32 = 500.0;
+
+pub const SCREEN_WIDTH: f32 = ACTIVE_WIDTH + 2. * XOFFSET;
+pub const SCREEN_HEIGHT: f32 = ACTIVE_HEIGHT + 2. * YOFFSET;
+
+pub const XOFFSET: f32 = 100.;
+pub const YOFFSET: f32 = 100.;
 
 pub const COULOMB_CONSTANT: f32 = 50000.0;
 
 pub const VELOCITY_SCALE: f32 = 0.0;
 
 pub const MAXIMUM_SPEED: f32 = 10.0 * WALL_THICKNESS / TIME_STEP;
+
+pub const EXCLUSION_RADIUS: f32 = 100.0;
 
 #[derive(Component,PartialEq)]
 pub enum Collider {

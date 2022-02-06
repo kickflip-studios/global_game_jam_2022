@@ -85,7 +85,7 @@ fn setup(
 
     // Position windows on your monitor
     let mut window = windows.get_primary_mut().unwrap();
-    window.set_position(IVec2::new(1000, 0));
+    window.set_position(IVec2::new(0, 0));
 
     commands.insert_resource(SpriteInfos {
         player: load_image(&mut images, PLAYER_SPRITE),

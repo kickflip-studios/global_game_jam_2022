@@ -80,11 +80,11 @@ pub fn player_movement(
     // FIXME: this isnt quite working atm...
     translation.x = translation
         .x
-        .min(SCREEN_WIDTH / 2. - WALL_THICKNESS)
-        .max(-SCREEN_WIDTH / 2. + WALL_THICKNESS);
+        .min(ACTIVE_WIDTH / 2. - WALL_THICKNESS)
+        .max(-ACTIVE_WIDTH / 2. + WALL_THICKNESS);
     translation.y = translation
         .y
-        .min(SCREEN_HEIGHT / 2. - WALL_THICKNESS)
-        .max(-SCREEN_HEIGHT / 2. + WALL_THICKNESS);
+        .min(ACTIVE_HEIGHT / 2. - WALL_THICKNESS)
+        .max(-ACTIVE_HEIGHT / 2. + WALL_THICKNESS);
 }
 
